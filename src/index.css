@@ -1,0 +1,206 @@
+@import "tailwindcss";
+@import "@fontsource-variable/overpass";
+
+/*
+  Design tokens.
+  Overpass is modelled on highway signage lettering, which suits a transit app.
+  - ink:    text, and the dark departure board
+  - paper:  page background
+  - route:  the route line, primary buttons and navigation
+  - signal: the shuttle itself, ETAs, and every demo-simulation label
+  - alert:  errors and destructive actions
+*/
+@theme {
+  --font-sans: "Overpass Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --color-ink: #17212b;
+  --color-ink-soft: #273340;
+  --color-paper: #f3f5f4;
+  --color-line: #d7dddb;
+  --color-muted: #56636e;
+  --color-route: #0e6b57;
+  --color-route-dark: #0a5243;
+  --color-route-tint: #e2f0eb;
+  --color-signal: #f2b705;
+  --color-signal-tint: #fdf3cf;
+  --color-signal-ink: #6b4d00;
+  --color-alert: #b9342a;
+  --color-alert-tint: #fbe9e7;
+
+  --animate-toast-in: toast-in 200ms ease-out;
+  --animate-dialog-in: dialog-in 160ms ease-out;
+  --animate-drawer-in: drawer-in 200ms ease-out;
+
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes dialog-in {
+    from {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes drawer-in {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    @apply bg-paper font-sans text-ink antialiased;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-route;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Small reusable class names, so pages stay readable. */
+@layer components {
+  .panel {
+    @apply rounded-xl border border-line bg-white;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply bg-route text-white hover:bg-route-dark;
+  }
+
+  .btn-secondary {
+    @apply border border-line bg-white text-ink hover:bg-paper;
+  }
+
+  .btn-danger {
+    @apply bg-alert text-white hover:bg-alert/90;
+  }
+
+  .btn-ghost {
+    @apply text-muted hover:bg-paper hover:text-ink;
+  }
+
+  .field-label {
+    @apply block text-sm font-semibold text-ink;
+  }
+
+  .field-input {
+    @apply mt-1.5 block w-full rounded-lg border border-line bg-white px-3 py-2.5 text-sm text-ink placeholder:text-muted/70 focus:border-route focus:ring-2 focus:ring-route/25 focus:outline-none aria-[invalid=true]:border-alert disabled:bg-paper disabled:text-muted;
+  }
+
+  .field-hint {
+    @apply mt-1.5 text-sm text-muted;
+  }
+
+  .field-error {
+    @apply mt-1.5 text-sm font-medium text-alert;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/*
+  Map styles. These sit outside any layer so they override Leaflet's own CSS.
+  "isolation: isolate" keeps Leaflet's high z-index values inside the map,
+  so the map never covers the menu, dialogs or notifications.
+*/
+.campus-map {
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+  background: var(--color-paper);
+  font-family: var(--font-sans);
+}
+
+.campus-map .stop-label {
+  border: 0;
+  border-radius: 6px;
+  background: white;
+  padding: 2px 7px;
+  color: var(--color-ink);
+  font-size: 12px;
+  font-weight: 650;
+  box-shadow: 0 1px 3px rgb(23 33 43 / 0.25);
+}
+
+.campus-map .stop-label::before {
+  display: none;
+}
+
+.shuttle-marker {
+  position: relative;
+}
+
+.shuttle-marker__dot {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  border: 3px solid var(--color-ink);
+  border-radius: 9999px;
+  background: white;
+  color: var(--color-ink);
+  box-shadow: 0 2px 6px rgb(23 33 43 / 0.35);
+}
+
+.shuttle-marker.is-selected .shuttle-marker__dot {
+  background: var(--color-signal);
+}
+
+.shuttle-marker__dot svg {
+  width: 58%;
+  height: 58%;
+}
+
+.shuttle-marker__code {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-top: 3px;
+  transform: translateX(-50%);
+  border-radius: 4px;
+  background: var(--color-ink);
+  padding: 0 5px;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  white-space: nowrap;
+}
